@@ -1,137 +1,194 @@
 import { useState, useEffect } from "react"
-import { ModeToggle } from "./components/mode-toggle"
 import { ThemeProvider } from "./components/theme-provider"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Mail, Terminal, Globe, ExternalLink,
-  Briefcase, Code2, ChevronRight, ChevronLeft
+  Briefcase, Code2, ChevronRight, ChevronLeft, Fingerprint, Layers, Cpu, Loader2
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 
-// Variants
-const fadeInUp: any = {
-  hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+// Reusable Custom Animations
+const fadeUp: any = {
+  hidden: { opacity: 0, y: 40, filter: "blur(5px)" },
+  visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } }
 }
-
 const staggerContainer: any = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15
-    }
-  }
+  visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
+}
+const popIn: any = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
 }
 
 // Background Orbs
 const Background = () => {
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10 bg-background">
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/20 rounded-full mix-blend-screen filter blur-[100px] opacity-60 animate-blob"></div>
-      <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-purple-500/20 rounded-full mix-blend-screen filter blur-[100px] opacity-60 animate-blob animation-delay-2000"></div>
-      <div className="absolute -bottom-32 left-1/3 w-[500px] h-[500px] bg-blue-500/20 rounded-full mix-blend-screen filter blur-[100px] opacity-60 animate-blob animation-delay-4000"></div>
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+      {/* Immersive cinematic background */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,16,24,0)_0%,rgba(0,0,0,0.5)_100%)] z-[1]"></div>
+
+      {/* Super glowing gradient backdrop */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-primary/15 rounded-full mix-blend-screen filter blur-[120px] opacity-70 animate-blob"></div>
+      <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-purple-600/15 rounded-full mix-blend-screen filter blur-[120px] opacity-70 animate-blob animation-delay-2000"></div>
+      <div className="absolute bottom-[-10%] left-[20%] w-[50vw] h-[50vw] bg-blue-600/15 rounded-full mix-blend-screen filter blur-[120px] opacity-70 animate-blob animation-delay-4000"></div>
+
+      {/* Sleek mesh overlay */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:32px_32px] opacity-50 z-[2]"></div>
     </div>
   )
 }
 
-// Project Card Component with Slideshow
+// Beautiful Floating Navbar
+const Navbar = () => {
+  return (
+    <motion.nav
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.6, ease: "easeOut", delay: 0.5 }}
+      className="fixed top-6 left-0 right-0 z-50 flex justify-center pointer-events-none"
+    >
+      <div className="px-6 py-3 bg-black/40 backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex gap-8 pointer-events-auto items-center">
+        <a href="#experience" className="text-sm font-semibold text-white/60 hover:text-primary transition-all hover:scale-105 active:scale-95">Experience</a>
+        <div className="w-1.5 h-1.5 rounded-full bg-white/10"></div>
+        <a href="#projects" className="text-sm font-semibold text-white/60 hover:text-primary transition-all hover:scale-105 active:scale-95">Projects</a>
+        <div className="w-1.5 h-1.5 rounded-full bg-white/10"></div>
+        <a href="#skills" className="text-sm font-semibold text-white/60 hover:text-primary transition-all hover:scale-105 active:scale-95">Skills</a>
+      </div>
+    </motion.nav>
+  )
+}
+
+// Project Card Component
 const ProjectCard = ({ project }: { project: any }) => {
   const [currentImage, setCurrentImage] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    // Preload next image
+    const nextIdx = (currentImage + 1) % project.images.length;
+    const img = new Image();
+    img.src = project.images[nextIdx];
+  }, [currentImage, project.images]);
 
   useEffect(() => {
     const rawInterval = import.meta.env.VITE_CAROUSEL_INTERVAL;
     const intervalTime = rawInterval !== undefined ? Number(rawInterval) : 5000;
-
     if (intervalTime <= 0 || project.images.length <= 1) return;
 
-    const timer = setInterval(() => {
-      setCurrentImage((prev) => (prev + 1) % project.images.length);
-    }, intervalTime);
-
+    const timer = setInterval(() => setCurrentImage((prev) => (prev + 1) % project.images.length), intervalTime);
     return () => clearInterval(timer);
   }, [project.images.length]);
 
-  const nextImage = () => {
-    setCurrentImage((prev) => (prev + 1) % project.images.length);
-  };
-  const prevImage = () => {
-    setCurrentImage((prev) => (prev - 1 + project.images.length) % project.images.length);
-  };
+  const nextImage = () => setCurrentImage((prev) => (prev + 1) % project.images.length);
+  const prevImage = () => setCurrentImage((prev) => (prev - 1 + project.images.length) % project.images.length);
 
   return (
-    <motion.div variants={fadeInUp} whileHover={{ y: -5 }} transition={{ duration: 0.3 }}>
-      <Card className="overflow-hidden bg-card/40 backdrop-blur-xl border-border/40 shadow-2xl relative transition-all hover:border-primary/40 duration-500 rounded-[2rem] flex flex-col md:flex-row w-full group">
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-100px" }}
+      variants={fadeUp}
+      whileHover={{ y: -5 }}
+      transition={{ duration: 0.4 }}
+    >
+      <Card className="overflow-hidden bg-card/20 backdrop-blur-2xl border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.12)] relative transition-all hover:bg-card/30 duration-500 rounded-[2rem] flex flex-col md:flex-row w-full group">
+
+        {/* Glow behind card on hover */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+
         {/* Slideshow Side */}
-        <div className="relative w-full md:w-1/2 h-72 md:h-auto min-h-[300px] md:min-h-[400px] overflow-hidden bg-muted/5 flex items-center justify-center border-r border-border/10">
+        <div className="relative w-full md:w-1/2 h-72 md:h-auto min-h-[300px] md:min-h-[420px] overflow-hidden bg-black/20 flex items-center justify-center border-r border-white/5 p-6">
           <AnimatePresence mode="wait">
-            <motion.img
+            <motion.div
               key={currentImage}
-              initial={{ opacity: 0, scale: 1.02 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-              src={project.images[currentImage]}
-              className="absolute inset-0 m-auto w-[calc(100%-2.5rem)] h-[calc(100%-2.5rem)] object-contain rounded-xl drop-shadow-2xl"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800&h=600';
-              }}
-            />
+              transition={{ duration: 0.4 }}
+              className="absolute inset-0 flex items-center justify-center"
+            >
+              {loading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/5 animate-pulse">
+                  <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                </div>
+              )}
+              <motion.img
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ opacity: loading ? 0 : 1, scale: 1 }}
+                transition={{ duration: 0.6 }}
+                src={project.images[currentImage]}
+                onLoad={() => setLoading(false)}
+                className="w-[calc(100%-3rem)] h-[calc(100%-3rem)] object-contain rounded-xl drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-10 pointer-events-none"
+                onError={(e) => {
+                  setLoading(false);
+                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800&h=600';
+                }}
+              />
+            </motion.div>
           </AnimatePresence>
 
-          <div className="absolute inset-0 bg-gradient-to-r from-background/5 to-transparent mix-blend-overlay z-10 pointer-events-none"></div>
-
           {project.images.length > 1 && (
-            <div className="absolute inset-0 flex items-center justify-between p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
-              <Button variant="secondary" size="icon" onClick={prevImage} className="rounded-full bg-background/50 hover:bg-background/90 backdrop-blur-md shadow-md border-0">
-                <ChevronLeft className="h-5 w-5" />
+            <div className="absolute inset-0 flex items-center justify-between p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20">
+              <Button variant="secondary" size="icon" onClick={prevImage} className="rounded-full bg-black/40 hover:bg-black/80 text-white backdrop-blur-md border-0 h-12 w-12 shadow-xl hover:scale-110 transition-transform">
+                <ChevronLeft className="h-6 w-6 ml-[-2px]" />
               </Button>
-              <Button variant="secondary" size="icon" onClick={nextImage} className="rounded-full bg-background/50 hover:bg-background/90 backdrop-blur-md shadow-md border-0">
-                <ChevronRight className="h-5 w-5" />
+              <Button variant="secondary" size="icon" onClick={nextImage} className="rounded-full bg-black/40 hover:bg-black/80 text-white backdrop-blur-md border-0 h-12 w-12 shadow-xl hover:scale-110 transition-transform">
+                <ChevronRight className="h-6 w-6 mr-[-2px]" />
               </Button>
             </div>
           )}
-          {/* Indicators */}
+
+          {/* Mac-style pagination dots */}
           {project.images.length > 1 && (
             <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-2 z-20">
-              {project.images.map((_: any, i: number) => (
-                <div
-                  key={i}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${i === currentImage ? "w-6 bg-primary" : "w-1.5 bg-primary/30"}`}
-                />
-              ))}
+              <div className="flex bg-black/40 backdrop-blur-md px-3 py-2 rounded-full gap-2">
+                {project.images.map((_: any, i: number) => (
+                  <div
+                    key={i}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${i === currentImage ? "w-6 bg-primary" : "w-1.5 bg-white/40"}`}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </div>
 
         {/* Content Side */}
-        <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
-          <h3 className="text-3xl font-bold tracking-tight mb-4 text-foreground bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">
+        <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center relative z-20">
+          <h3 className="text-3xl font-extrabold tracking-tight mb-4 text-white group-hover:text-primary transition-colors duration-500">
             {project.name}
           </h3>
-          <p className="text-muted-foreground text-lg leading-relaxed mb-8">
+          <p className="text-muted-foreground text-lg leading-relaxed mb-8 flex-1">
             {project.desc}
           </p>
-          <div className="flex flex-wrap gap-2 mb-8">
-            {project.tech.map((t: string) => (
-              <Badge key={t} variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 border-0 font-medium px-3 py-1">
-                {t}
-              </Badge>
+          <div className="flex flex-wrap gap-2 mb-10">
+            {project.tech.map((t: string, i: number) => (
+              <motion.div key={t} initial={{ opacity: 0, scale: 0.8 }} whileInView={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 + i * 0.05 }} viewport={{ once: true }}>
+                <Badge variant="outline" className="bg-primary/5 border-primary/20 text-primary hover:bg-primary/20 font-medium px-3 py-1 shadow-sm">
+                  {t}
+                </Badge>
+              </motion.div>
             ))}
           </div>
-          <div className="mt-auto flex flex-wrap gap-6 pt-6 border-t border-border/40">
+          <div className="flex flex-wrap gap-6 pt-6 border-t border-white/10">
             {project.links.github && (
-              <a href={project.links.github} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors">
-                <Terminal className="h-5 w-5" /> Source Code
+              <a href={project.links.github} target="_blank" rel="noreferrer" className="group/link flex items-center gap-2 text-sm font-bold text-white/70 hover:text-white transition-colors">
+                <div className="p-2 rounded-full bg-white/5 group-hover/link:bg-white/10 transition-colors">
+                  <Terminal className="h-4 w-4" />
+                </div>
+                Source Code
               </a>
             )}
             {project.links.live && (
-              <a href={project.links.live} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors">
-                <ExternalLink className="h-5 w-5" /> Live Demo
+              <a href={project.links.live} target="_blank" rel="noreferrer" className="group/link flex items-center gap-2 text-sm font-bold text-white/70 hover:text-white transition-colors">
+                <div className="p-2 rounded-full bg-white/5 group-hover/link:bg-white/10 transition-colors">
+                  <ExternalLink className="h-4 w-4" />
+                </div>
+                Live Demo
               </a>
             )}
           </div>
@@ -143,6 +200,10 @@ const ProjectCard = ({ project }: { project: any }) => {
 
 function App() {
   const env = import.meta.env
+  useEffect(() => {
+    // Force dark mode strictly per user request
+    document.documentElement.classList.add("dark");
+  }, []);
 
   const projects = [
     {
@@ -150,182 +211,207 @@ function App() {
       desc: "Comprehensive Learning Management System supporting advanced role-based access for students and instructors. Features include secure payments processing via Stripe, custom progress tracking, and optimized video delivery using MUX infrastructure.",
       tech: ["Next.js", "React", "TypeScript", "MongoDB", "Stripe", "MUX"],
       images: ["/lms/image-1.png", "/lms/image-2.png", "/lms/image-3.png", "/lms/image-4.png", "/lms/image-5.png", "/lms/image-6.png", "/lms/image-7.png"],
-      links: {
-        github: "https://github.com/Tanish0023/lms-platform",
-        live: "https://lms-platform.tanishportfolio.in/"
-      }
+      links: { github: "https://github.com/Tanish0023/lms-platform", live: "https://lms-platform.tanishportfolio.in/" }
     },
     {
       name: "Event Finder",
       desc: "Modern Event Search Platform built with ReactJS for beautiful dynamic SSR event fetching. Seamlessly integrated with Ticketmaster API and Google Geolocation APIs for pinpoint accuracy. Supported by a robust Django backend.",
       tech: ["ReactJS", "Django REST", "Ticketmaster API"],
       images: ["/event-finder/image-1.png", "/event-finder/image-2.png", "/event-finder/image-3.png", "/event-finder/image-4.png"],
-      links: {
-        github: "https://github.com/Tanish0023/hotsprings-assignment",
-        live: undefined
-      }
+      links: { github: "https://github.com/Tanish0023/hotsprings-assignment", live: undefined }
     },
     {
       name: "Web Wallet",
       desc: "Fast, minimal Solana-based Wallet App guaranteeing secure storage of mnemonic phrases and key pairs. Embedded with custom faucet integration to seamlessly allow users to test receiving SOL on network.",
       tech: ["Next.js", "Tailwind CSS", "Solana", "Web3"],
       images: ["/wallet/image-1.png", "/wallet/image-2.png", "/wallet/image-3.png", "/wallet/image-4.png", "/wallet/image-5.png", "/wallet/image-6.png"],
-      links: {
-        github: "https://github.com/Tanish0023/DAPPs",
-        live: "https://tanish-dapps.vercel.app/"
-      }
+      links: { github: "https://github.com/Tanish0023/DAPPs", live: "https://tanish-dapps.vercel.app/" }
     }
   ];
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <Background />
-      <div className="min-h-screen text-foreground selection:bg-primary/30 relative z-10 transition-colors duration-500 overflow-x-hidden">
-        <ModeToggle />
+      <Navbar />
 
-        <main className="container mx-auto px-6 py-24 max-w-5xl">
-          <motion.div
+      <div className="min-h-screen text-foreground selection:bg-primary/30 relative z-10 transition-colors duration-500 overflow-x-hidden font-sans">
+
+        <main className="container mx-auto px-6 pt-32 pb-24 max-w-6xl">
+
+          {/* --- HERO SECTION --- */}
+          <motion.section
             initial="hidden"
             animate="visible"
             variants={staggerContainer}
-            className="space-y-32"
+            className="flex flex-col items-center sm:items-start text-center sm:text-left pt-10 pb-32"
           >
-            {/* Hero Section */}
-            <motion.section variants={fadeInUp} className="flex flex-col items-center sm:items-start text-center sm:text-left pt-10">
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="mb-8 p-1 rounded-full bg-gradient-to-r from-primary/50 to-purple-500/50 inline-block drop-shadow-lg"
-              >
-                <div className="rounded-full bg-background/90 backdrop-blur-xl px-6 py-2 text-sm font-medium tracking-wide border border-border/50">
-                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-400">
-                    Available for new opportunities ✨
-                  </span>
+            <motion.div variants={popIn} className="mb-10 rounded-full p-[1px] bg-gradient-to-r from-primary via-purple-500 to-blue-500 inline-block drop-shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+              <div className="rounded-full bg-black/60 backdrop-blur-3xl px-6 py-2.5 text-sm font-semibold tracking-wide border border-white/10 flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
+                  Open to new opportunities
+                </span>
+              </div>
+            </motion.div>
+
+            <motion.h1
+              variants={fadeUp}
+              className="text-6xl sm:text-8xl lg:text-[7.5rem] font-[900] tracking-tighter mb-8 text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.1)] pb-2 leading-[0.95]"
+            >
+              Hello, I'm <br className="hidden sm:block" />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-primary animate-gradient-x bg-[length:200%_auto] drop-shadow-[0_0_20px_rgba(168,85,247,0.3)]">
+                Tanish Aggarwal.
+              </span>
+            </motion.h1>
+
+            <motion.p variants={fadeUp} className="text-xl sm:text-2xl text-muted-foreground leading-relaxed max-w-3xl font-light mb-12">
+              A Full-stack developer building scaling, production-grade web applications using <span className="text-white font-medium drop-shadow-md">React, Next.js, and Django</span>, with a profound focus on performance optimization & pristine architecture.
+            </motion.p>
+
+            <motion.div variants={fadeUp} className="flex flex-wrap items-center justify-center sm:justify-start gap-5">
+              {[
+                { icon: Terminal, label: "GitHub", href: env.VITE_GITHUB_LINK },
+                { icon: Globe, label: "LinkedIn", href: env.VITE_LINKEDIN_LINK },
+                { icon: Code2, label: "Codolio", href: env.VITE_CODOLIO_LINK },
+                { icon: Mail, label: env.VITE_EMAIL || "Email", href: `mailto:${env.VITE_EMAIL}` },
+              ].map((item, i) => (
+                <motion.a
+                  key={i}
+                  whileHover={{ scale: 1.05, y: -4 }}
+                  whileTap={{ scale: 0.95 }}
+                  href={item.href} target="_blank" rel="noreferrer"
+                  className="group flex items-center gap-3 px-6 py-3.5 rounded-2xl bg-white/5 backdrop-blur-lg border border-white/10 hover:border-primary/50 hover:bg-white/10 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] transition-all duration-300"
+                >
+                  <item.icon className="h-5 w-5 text-primary group-hover:text-white transition-colors" />
+                  <span className="font-semibold text-white/90 group-hover:text-white transition-colors tracking-wide">{item.label}</span>
+                </motion.a>
+              ))}
+            </motion.div>
+          </motion.section>
+
+          {/* --- WORK EXPERIENCE (TIMELINE) --- */}
+          <section id="experience" className="space-y-16 pb-32 pt-10 scroll-m-20">
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeUp} className="flex flex-col gap-2">
+              <div className="flex items-center gap-4 text-5xl font-extrabold tracking-tight text-white mb-2">
+                <Briefcase className="h-10 w-10 text-primary" /> Experience
+              </div>
+              <div className="w-24 h-1.5 rounded-full bg-gradient-to-r from-primary to-transparent"></div>
+            </motion.div>
+
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp} className="relative pl-8 md:pl-0">
+              {/* Timeline Line */}
+              <div className="hidden md:block absolute left-[50%] top-0 bottom-0 w-[2px] bg-gradient-to-b from-primary via-white/10 to-transparent transform -translate-x-1/2"></div>
+              <div className="md:hidden absolute left-0 top-0 bottom-0 w-[2px] bg-gradient-to-b from-primary via-white/10 to-transparent"></div>
+
+              {/* Timeline Item */}
+              <div className="relative flex flex-col md:flex-row justify-between items-center w-full mb-8">
+                {/* Left Side (Empty on Desktop, Dates on Mobile) */}
+                <div className="hidden md:flex w-5/12 justify-end pr-12">
+                  <div className="text-right">
+                    <p className="text-3xl font-extrabold text-white">Hotspring</p>
+                    <p className="text-primary font-medium mt-1">Full Stack Developer Intern</p>
+                  </div>
                 </div>
-              </motion.div>
 
-              <h1 className="text-6xl sm:text-8xl font-extrabold tracking-tight mb-8 bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground/90 to-primary/80 drop-shadow-sm pb-2">
-                Tanish Aggarwal
-              </h1>
-              <p className="text-xl sm:text-2xl text-muted-foreground leading-relaxed max-w-3xl font-light mb-12">
-                Full-stack developer experienced in building and scaling production-grade web applications using <span className="text-foreground font-medium">React, Next.js, and Django</span>, with a strong focus on performance optimization & clean architecture.
-              </p>
+                {/* Center Node */}
+                <div className="absolute left-[-37px] md:left-[50%] w-6 h-6 rounded-full bg-primary border-4 border-background transform md:-translate-x-1/2 z-10 shadow-[0_0_15px_rgba(168,85,247,0.8)]"></div>
 
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4">
-                {[
-                  { icon: Terminal, label: "GitHub", href: env.VITE_GITHUB_LINK },
-                  { icon: Globe, label: "LinkedIn", href: env.VITE_LINKEDIN_LINK },
-                  { icon: Code2, label: "Codolio", href: env.VITE_CODOLIO_LINK },
-                  { icon: Mail, label: env.VITE_EMAIL || "Email", href: `mailto:${env.VITE_EMAIL}` },
-                ].map((item, i) => (
-                  <motion.a
-                    key={i}
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    href={item.href} target="_blank" rel="noreferrer"
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card/50 backdrop-blur-md border border-border/50 hover:border-primary/50 hover:bg-primary/5 hover:shadow-lg hover:shadow-primary/5 transition-all"
-                  >
-                    <item.icon className="h-4 w-4 text-primary" /> <span className="font-medium">{item.label}</span>
-                  </motion.a>
-                ))}
+                {/* Right Side (Content) */}
+                <div className="w-full md:w-5/12 md:pl-12 pt-2 md:pt-0">
+                  <div className="md:hidden mb-4">
+                    <p className="text-3xl font-extrabold text-white">Hotspring</p>
+                    <p className="text-primary font-medium mt-1">Full Stack Developer Intern</p>
+                  </div>
+                  <Badge variant="outline" className="mb-6 bg-white/5 backdrop-blur-md border-white/10 text-white/80 py-1.5 px-4 shadow-xl">May 2025 – Present</Badge>
+                  <Card className="bg-card/20 backdrop-blur-xl border-white/10 shadow-2xl hover:border-primary/30 transition-colors duration-500 rounded-3xl">
+                    <CardContent className="p-8">
+                      <ul className="space-y-5 text-muted-foreground">
+                        {[
+                          "Optimized asset-heavy pages (rendering, pagination, filtering), reducing page load time by 35%.",
+                          "Built asset filtering, conversion tracking, and UI state updates, improving user engagement by 25%.",
+                          "Resolved data ingestion and production issues via server log analysis, reducing failures by 20%.",
+                          "Improved application stability by fixing edge-case bugs and implementing proper error handling across frontend and backend."
+                        ].map((bullet, i) => (
+                          <li key={i} className="flex items-start gap-4 group/item">
+                            <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary/50 group-hover/item:bg-primary group-hover/item:scale-150 transition-all shrink-0"></div>
+                            <span className="leading-relaxed text-base group-hover/item:text-white transition-colors">{bullet}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
-            </motion.section>
+            </motion.div>
+          </section>
 
-            {/* Work Experience */}
-            <motion.section variants={fadeInUp} className="space-y-10 relative">
-              <div className="flex items-center gap-4 text-4xl font-bold tracking-tight">
-                <div className="p-3 rounded-2xl bg-primary/10 text-primary"><Briefcase className="h-8 w-8" /></div>
-                Experience
+          {/* --- PROJECTS --- */}
+          <section id="projects" className="space-y-16 pb-32 pt-10 scroll-m-20">
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeUp} className="flex flex-col gap-2">
+              <div className="flex items-center gap-4 text-5xl font-extrabold tracking-tight text-white mb-2">
+                <Fingerprint className="h-10 w-10 text-primary" /> Featured Projects
               </div>
+              <div className="w-24 h-1.5 rounded-full bg-gradient-to-r from-primary to-transparent"></div>
+            </motion.div>
 
-              <motion.div whileHover={{ scale: 1.01 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
-                <Card className="overflow-hidden bg-card/40 backdrop-blur-xl border-border/40 shadow-2xl relative group transition-all hover:border-primary/40 duration-500">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                  <CardContent className="p-8 sm:p-10">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                      <div>
-                        <h3 className="text-3xl font-bold tracking-tight text-foreground bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">Hotspring</h3>
-                        <p className="text-primary font-semibold text-lg mt-2">Full Stack Developer Intern</p>
-                      </div>
-                      <Badge variant="secondary" className="px-4 py-1.5 text-sm bg-secondary/80 backdrop-blur-md border border-border/50 shadow-sm leading-none h-fit">May 2025 – Present</Badge>
-                    </div>
-                    <ul className="space-y-4 text-muted-foreground relative z-10">
-                      {[
-                        "Optimized asset-heavy pages (rendering, pagination, filtering), reducing page load time by 35%.",
-                        "Built asset filtering, conversion tracking, and UI state updates, improving user engagement by 25%.",
-                        "Resolved data ingestion and production issues via server log analysis, reducing failures by 20%.",
-                        "Improved application stability by fixing edge-case bugs and implementing proper error handling across frontend and backend.",
-                        "Built and maintained production-ready full-stack features using React, TypeScript, Django, GraphQL, following CI/CD."
-                      ].map((bullet, i) => (
-                        <li key={i} className="flex items-start gap-3 group/item">
-                          <ChevronRight className="h-5 w-5 text-primary/50 group-hover/item:text-primary shrink-0 mt-0.5 transition-colors" />
-                          <span className="leading-relaxed text-base group-hover/item:text-foreground transition-colors">{bullet}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </motion.section>
+            <div className="flex flex-col gap-16">
+              {projects.map((project, idx) => (
+                <ProjectCard key={idx} project={project} />
+              ))}
+            </div>
+          </section>
 
-            {/* Featured Projects (Slideshow Row Layout) */}
-            <motion.section variants={fadeInUp} className="space-y-10">
-              <div className="flex items-center gap-4 text-4xl font-bold tracking-tight">
-                <div className="p-3 rounded-2xl bg-primary/10 text-primary"><Code2 className="h-8 w-8" /></div>
-                Featured Projects
+          {/* --- SKILLS --- */}
+          <section id="skills" className="space-y-16 pb-20 pt-10 scroll-m-20">
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeUp} className="flex flex-col gap-2">
+              <div className="flex items-center gap-4 text-5xl font-extrabold tracking-tight text-white mb-2">
+                <Cpu className="h-10 w-10 text-primary" /> Technical Arsenal
               </div>
+              <div className="w-24 h-1.5 rounded-full bg-gradient-to-r from-primary to-transparent"></div>
+            </motion.div>
 
-              <div className="flex flex-col gap-12">
-                {projects.map((project, idx) => (
-                  <ProjectCard key={idx} project={project} />
-                ))}
-              </div>
-            </motion.section>
-
-            {/* Skills */}
-            <motion.section variants={fadeInUp} className="space-y-10">
-              <div className="flex items-center gap-4 text-4xl font-bold tracking-tight">
-                <div className="p-3 rounded-2xl bg-primary/10 text-primary"><Terminal className="h-8 w-8" /></div>
-                Technical Arsenal
-              </div>
-
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {[
-                  { title: "Languages", skills: ["JavaScript", "TypeScript", "Python", "Java", "C++"] },
-                  { title: "Frameworks & Libraries", skills: ["React", "Next.js", "Node.js", "Express", "Django", "Tailwind CSS"] },
-                  { title: "Databases", skills: ["MongoDB", "MySQL", "Prisma"] },
-                  { title: "DevOps & Tools", skills: ["Git", "Docker", "Vercel", "AWS", "GraphQL"] },
-                  { title: "Web3", skills: ["Foundry", "Solidity", "Ethers.js"] },
-                  { title: "Soft Skills", skills: ["Problem Solving", "Team Collaboration", "Time Management"] }
-                ].map((category, idx) => (
-                  <motion.div key={idx} whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
-                    <Card className="bg-card/40 backdrop-blur-xl border-border/30 shadow-xl hover:border-primary/30 transition-all duration-300 hover:shadow-primary/5 rounded-3xl h-full">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {[
+                { title: "Languages", icon: Code2, skills: ["JavaScript", "TypeScript", "Python", "Java", "C++"] },
+                { title: "Frameworks", icon: Layers, skills: ["React", "Next.js", "Node.js", "Express", "Django", "Tailwind CSS"] },
+                { title: "Databases", icon: Cpu, skills: ["MongoDB", "MySQL", "Prisma", "PostgreSQL"] },
+                { title: "DevOps & Cloud", icon: Terminal, skills: ["Git", "Docker", "Vercel", "AWS", "GraphQL"] },
+                { title: "Web3", icon: Fingerprint, skills: ["Foundry", "Solidity", "Ethers.js", "Solana"] },
+                { title: "Soft Skills", icon: Briefcase, skills: ["Problem Solving", "Team Collaboration", "Time Management"] }
+              ].map((category, idx) => (
+                <motion.div key={idx} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp} custom={idx}>
+                  <motion.div whileHover={{ y: -8, scale: 1.02 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="h-full">
+                    <Card className="bg-card/20 backdrop-blur-xl border-white/10 shadow-xl hover:shadow-[0_10px_40px_rgba(168,85,247,0.15)] hover:border-primary/40 transition-all duration-500 rounded-3xl h-full group">
                       <CardContent className="p-8">
-                        <h4 className="text-xl font-bold mb-6 text-foreground tracking-tight">{category.title}</h4>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex items-center gap-3 mb-6">
+                          <div className="p-2.5 rounded-xl bg-white/5 group-hover:bg-primary/20 group-hover:text-primary transition-colors text-white/70">
+                            <category.icon className="h-5 w-5" />
+                          </div>
+                          <h4 className="text-xl font-bold text-white tracking-tight">{category.title}</h4>
+                        </div>
+                        <div className="flex flex-wrap gap-2.5">
                           {category.skills.map((skill) => (
-                            <Badge key={skill} variant="outline" className="border-border/50 bg-background/50 text-muted-foreground hover:text-foreground hover:border-primary/40 hover:bg-primary/5 transition-all text-sm py-1.5 px-3">
+                            <div key={skill} className="border border-white/10 bg-white/5 text-white/80 hover:text-white hover:border-primary/50 hover:bg-primary/20 hover:shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all duration-300 text-sm py-2 px-4 rounded-xl cursor-default">
                               {skill}
-                            </Badge>
+                            </div>
                           ))}
                         </div>
                       </CardContent>
                     </Card>
                   </motion.div>
-                ))}
-              </div>
-            </motion.section>
+                </motion.div>
+              ))}
+            </div>
+          </section>
 
-            {/* Footer */}
-            <motion.footer variants={fadeInUp} className="text-center py-10 opacity-70">
-              <Separator className="mb-8 border-border/40" />
-              <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 font-medium tracking-wide">
-                Built with React, Vite & Shadcn <ChevronRight className="h-4 w-4 text-primary" /> Tanish Aggarwal
-              </p>
-            </motion.footer>
+          {/* --- FOOTER --- */}
+          <motion.footer initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center py-16 mt-20 relative">
+            <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+            <p className="text-base text-white/50 flex justify-center items-center gap-2 font-medium tracking-wide">
+              Built with precision & passion <ChevronRight className="h-4 w-4 text-primary mx-1" /> Tanish Aggarwal
+            </p>
+          </motion.footer>
 
-          </motion.div>
         </main>
       </div>
     </ThemeProvider>
