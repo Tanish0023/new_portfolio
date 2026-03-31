@@ -3,7 +3,7 @@ import { ThemeProvider } from "./components/theme-provider"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Mail, Terminal, Globe, ExternalLink,
-  Briefcase, Code2, ChevronRight, ChevronLeft, Fingerprint, Layers, Cpu, Loader2
+  Briefcase, Code2, ChevronRight, ChevronLeft, Fingerprint, Layers, Cpu, Loader2, GraduationCap
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -52,6 +52,8 @@ const Navbar = () => {
     >
       <div className="px-6 py-3 bg-black/40 backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex gap-8 pointer-events-auto items-center">
         <a href="#experience" className="text-sm font-semibold text-white/60 hover:text-primary transition-all hover:scale-105 active:scale-95">Experience</a>
+        <div className="w-1.5 h-1.5 rounded-full bg-white/10"></div>
+        <a href="#education" className="text-sm font-semibold text-white/60 hover:text-primary transition-all hover:scale-105 active:scale-95">Education</a>
         <div className="w-1.5 h-1.5 rounded-full bg-white/10"></div>
         <a href="#projects" className="text-sm font-semibold text-white/60 hover:text-primary transition-all hover:scale-105 active:scale-95">Projects</a>
         <div className="w-1.5 h-1.5 rounded-full bg-white/10"></div>
@@ -345,6 +347,84 @@ function App() {
             </motion.div>
           </section>
 
+          {/* --- EDUCATION --- */}
+          <section id="education" className="space-y-16 pb-32 pt-10 scroll-m-20">
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeUp} className="flex flex-col gap-2">
+              <div className="flex items-center gap-4 text-5xl font-extrabold tracking-tight text-white mb-2">
+                <GraduationCap className="h-10 w-10 text-primary" /> Education
+              </div>
+              <div className="w-24 h-1.5 rounded-full bg-gradient-to-r from-primary to-transparent"></div>
+            </motion.div>
+
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp} className="relative pl-8 md:pl-0">
+              {/* Timeline Line */}
+              <div className="hidden md:block absolute left-[50%] top-0 bottom-0 w-[2px] bg-gradient-to-b from-primary via-white/10 to-transparent transform -translate-x-1/2"></div>
+              <div className="md:hidden absolute left-0 top-0 bottom-0 w-[2px] bg-gradient-to-b from-primary via-white/10 to-transparent"></div>
+
+              {/* Timeline Item (B.Tech) */}
+              <div className="relative flex flex-col md:flex-row justify-between items-center w-full mb-16">
+                {/* Left Side */}
+                <div className="hidden md:flex w-5/12 justify-end pr-12">
+                  <div className="text-right">
+                    <p className="text-3xl font-extrabold text-white">Sharda University</p>
+                    <p className="text-primary font-medium mt-1">B.Tech. in CSE</p>
+                  </div>
+                </div>
+
+                {/* Center Node */}
+                <div className="absolute left-[-37px] md:left-[50%] w-6 h-6 rounded-full bg-primary border-4 border-background transform md:-translate-x-1/2 z-10 shadow-[0_0_15px_rgba(168,85,247,0.8)]"></div>
+
+                {/* Right Side */}
+                <div className="w-full md:w-5/12 md:pl-12 pt-2 md:pt-0">
+                  <div className="md:hidden mb-4">
+                    <p className="text-3xl font-extrabold text-white">Sharda University</p>
+                    <p className="text-primary font-medium mt-1">B.Tech. in CSE</p>
+                  </div>
+                  <Badge variant="outline" className="mb-6 bg-white/5 backdrop-blur-md border-white/10 text-white/80 py-1.5 px-4 shadow-xl">2023 – 2027</Badge>
+                  <Card className="bg-card/20 backdrop-blur-xl border-white/10 shadow-2xl hover:border-primary/30 transition-colors duration-500 rounded-3xl">
+                    <CardContent className="p-8">
+                      <p className="text-muted-foreground leading-relaxed text-base italic">Specializing in Computer Science and Engineering with a strong focus on core technical concepts and modern development practices.</p>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <Badge variant="outline" className="bg-primary/10 border-primary/20 text-primary px-3 py-1 text-sm font-bold">GPA: 8.89</Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Timeline Item (12th) */}
+              <div className="relative flex flex-col md:flex-row justify-between items-center w-full mb-8">
+                {/* Left Side (Empty for reverse timeline feel or just switch) */}
+                <div className="hidden md:flex w-5/12 md:order-2 justify-start pl-12">
+                  <div className="text-left">
+                    <p className="text-3xl font-extrabold text-white">Class 12th</p>
+                    <p className="text-primary font-medium mt-1">CBSE Board</p>
+                  </div>
+                </div>
+
+                {/* Center Node */}
+                <div className="absolute left-[-37px] md:left-[50%] w-6 h-6 rounded-full bg-primary border-4 border-background transform md:-translate-x-1/2 z-10 shadow-[0_0_15px_rgba(168,85,247,0.8)]"></div>
+
+                {/* Right Side (Card on Left for desktop) */}
+                <div className="w-full md:w-5/12 md:order-1 md:pr-12 pt-2 md:pt-0 text-left md:text-right">
+                  <div className="md:hidden mb-4 text-left">
+                    <p className="text-3xl font-extrabold text-white">Class 12th</p>
+                    <p className="text-primary font-medium mt-1">CBSE Board</p>
+                  </div>
+                  <Badge variant="outline" className="mb-6 bg-white/5 backdrop-blur-md border-white/10 text-white/80 py-1.5 px-4 shadow-xl">2022 – 2023</Badge>
+                  <Card className="bg-card/20 backdrop-blur-xl border-white/10 shadow-2xl hover:border-primary/30 transition-colors duration-500 rounded-3xl text-left">
+                    <CardContent className="p-8">
+                      <p className="text-muted-foreground leading-relaxed text-base italic">Completed senior secondary education with a focus on Science (PCM).</p>
+                      <div className="mt-4 flex flex-wrap gap-2 md:justify-end">
+                        <Badge variant="outline" className="bg-primary/10 border-primary/20 text-primary px-3 py-1 text-sm font-bold">Percentage: 93.8%</Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </motion.div>
+          </section>
+
           {/* --- PROJECTS --- */}
           <section id="projects" className="space-y-16 pb-32 pt-10 scroll-m-20">
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeUp} className="flex flex-col gap-2">
@@ -373,7 +453,7 @@ function App() {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {[
                 { title: "Languages", icon: Code2, skills: ["JavaScript", "TypeScript", "Python", "Java", "C++"] },
-                { title: "Frameworks", icon: Layers, skills: ["React", "Next.js", "Node.js", "Express", "Django", "Tailwind CSS"] },
+                { title: "Frameworks", icon: Layers, skills: ["React", "Next.js", "Node.js", "Express", "Django", "DRF", "Tailwind CSS"] },
                 { title: "Databases", icon: Cpu, skills: ["MongoDB", "MySQL", "Prisma", "PostgreSQL"] },
                 { title: "DevOps & Cloud", icon: Terminal, skills: ["Git", "Docker", "Vercel", "AWS", "GraphQL"] },
                 { title: "Web3", icon: Fingerprint, skills: ["Foundry", "Solidity", "Ethers.js", "Solana"] },
