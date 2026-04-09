@@ -209,6 +209,13 @@ function App() {
 
   const projects = [
     {
+      name: "Smart Recruitment System",
+      desc: "Built an AI-powered recruitment platform with automated resume parsing and semantic candidate-job matching, reducing hiring time.",
+      tech: ["React", "TypeScript", "GraphQL", "Django", "DRF", "PostgreSQL", "Redis", "Celery", "spaCy", "sentence-transformers"],
+      images: ["/job/image-1.png", "/job/image-2.png", "/job/image-3.png", "/job/image-4.png", "/job/image-5.png", "/job/image-6.png", "/job/image-7.png", "/job/image-8.png", "/job/image-9.png"],
+      links: { github: "https://github.com/Tanish0023/smart-recruitment", live: "https://job.tanishportfolio.in/" }
+    },
+    {
       name: "LMS Platform",
       desc: "Comprehensive Learning Management System supporting advanced role-based access for students and instructors. Features include secure payments processing via Stripe, custom progress tracking, and optimized video delivery using MUX infrastructure.",
       tech: ["Next.js", "React", "TypeScript", "MongoDB", "Stripe", "MUX"],
@@ -261,7 +268,7 @@ function App() {
               className="text-6xl sm:text-8xl lg:text-[7.5rem] font-[900] tracking-tighter mb-8 text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.1)] pb-2 leading-[0.95]"
             >
               Hello, I'm <br className="hidden sm:block" />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-primary animate-gradient-x bg-[length:200%_auto] drop-shadow-[0_0_20px_rgba(168,85,247,0.3)]">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-primary animate-gradient-x bg-[length:200%_auto] drop-shadow-[0_0_20px_rgba(168,85,247,0.3)] mt-5">
                 Tanish Aggarwal.
               </span>
             </motion.h1>
